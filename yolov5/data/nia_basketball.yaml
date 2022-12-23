@@ -1,0 +1,13 @@
+path: /local_datasets/detectron2/basketball  # dataset root dir
+train: jpg/train  # train images (relative to 'path') 128 images
+val: jpg/val  # val images (relative to 'path') 128 images
+test:  # test images (optional)
+
+# Classes (80 COCO classes)
+names:
+  0: person
+  1: ball
+  2: stadium
+  3: paintzone
+  4: goalpost
+  5: threepointsline
