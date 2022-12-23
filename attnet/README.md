@@ -9,7 +9,8 @@ sbatch_attnet_basketball_gt.sh : train
 scene_parse/attr_net/tools/run_test_basketball_mini_situation.py : val set에 대해 test
 
 
-``` python tools/run_test_basketball_mini_situation.py \
+``` 
+python tools/run_test_basketball_mini_situation.py \
 --run_dir /data/ahngeo11/nia/attnet/scene_parse/attr_net/tools/results \
 --dataset basketball_mini \   
 --load_checkpoint_path /data/ahngeo11/nia/attnet/output/checkpoint_best.pt \
