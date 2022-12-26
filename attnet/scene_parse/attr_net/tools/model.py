@@ -76,14 +76,20 @@ class AttributeNetwork(nn.Module):
         return self.pred.data.cpu().numpy()
     
     #*####
-    def check_correct(self, num_att) :
-        assert num_att == 1
+    def check_correct(self, att_len_list) :
+        #* (ex) att_len_list = [0, 2, 5]
+        #* pred.shape (B, output_dim)
         
-        score = 0
-        
+        score = torch.zeros((self.pred.shape[0], len(att_len_list[1:])))  #* initialize score list
+                
         for i in range(self.pred.shape[0]) :
-            if torch.argmax(self.pred[i]) == torch.argmax(self.label[i]) :   #* self.label = [1, 0] or [0, 1]
-                score += 1
+            for j, att_len in enumerate(att_len_list[1:]) : 
+                start_idx = att_len_list[j - 1]
+                end_idx = start_idx + att_len
+                if torch.argmax(self.pred[i][start_idx : end_idx]) == torch.argmax(self.label[i][start_idx : end_idx]) :  
+                    score[i, j] += 1
+                    
+        score = torch.sum(score, axis=0)  #* score.shape(1, num of atts)
         
         return score
     #*####
