@@ -1,5 +1,6 @@
 import json
 
+#* for use all attributes
 att_bind = {
     "선수1" : 0,
     "선수2" : 1,
@@ -46,16 +47,18 @@ att_bind = {
     "B팀" : 42  #선수소속
     }  
 
+#@ select target attributes like this
 # att_bind = {
 #     "A진영" : 0,
 #     "B진영" : 1  #선수위치(진영)
 #     }  
 
-# Goal : dict_keys(['object_masks', 'image_idxs', 'image_name', 'feature_vectors', 'scores'])
+#* Output Json
+#* Goal : dict_keys(['object_masks', 'image_idxs', 'image_name', 'feature_vectors', 'scores'])
 
-except_list = []
 
-with open("/data/ahngeo11/nia/attnet/annotations/train_ls.txt", 'r') as f :   #* if use mini dataset, path is "train_mini_ls.txt"
+#* Load train/val set list
+with open("/data/ahngeo11/nia/attnet/annotations/train_ls.txt", 'r') as f :   #@ if use mini dataset, path is "train_mini_ls.txt"
     train_list = f.readlines()
     for i in range(len(train_list)) :
         train_list[i] = train_list[i].split(".")[0]
@@ -72,10 +75,13 @@ image_name_list = []
 feature_vectors_list = []
 scores_list = []
 
+except_list = []
+
+
 for img_id, line in enumerate(json_list) :
     
-    # if img_id < 960 :   #* basketball_mini train set num = 960
-    if img_id < 15315 :   #* basketball train set num - 15315
+    # if img_id < 960 :   #@ basketball_mini train set num = 960
+    if img_id < 15315 :   #@ basketball train set num - 15315
         split = "/train_json/"
     else :
         split = "/val_json/"
@@ -87,8 +93,8 @@ for img_id, line in enumerate(json_list) :
     
     # for i, obj in data["annotations"] :  ### 10 objects in one json file, data["ann"][0] = {dict}
     ################ sorry! attnet use only player and ball imgs
-    for i, obj in enumerate([data["labelinginfo_scene representation"]["경기도구"], data["labelinginfo_scene representation"]["집단행동참여자"][0]]) :  ### ball and player
-    # for i, obj in enumerate([data["labelinginfo_scene representation"]["집단행동참여자"][0]]) :  #* only player
+    # for i, obj in enumerate([data["labelinginfo_scene representation"]["경기도구"], data["labelinginfo_scene representation"]["집단행동참여자"][0]]) :  #@## ball and player
+    for i, obj in enumerate([data["labelinginfo_scene representation"]["집단행동참여자"][0]]) :  #@## only player will be inputs
     
         if len(list(obj.values())) != 13 :    ### there are jsons with insufficient player atts
             except_list.append(line)
@@ -108,8 +114,9 @@ for img_id, line in enumerate(json_list) :
         #     obj_mask["counts"] = [max(x_coords), max(y_coords), min(x_coords), min(y_coords)]
         # elif obj.keys()[0] == "box" :
         
+        #* both ball and player use box type annotation
         location_info = obj["location"]
-        #* x, y in json = xmin, ymin
+        #*## x, y in json = xmin, ymin
         x_max = location_info["x"] + location_info["width"] 
         x_min = location_info["x"]  
         y_max = location_info["y"] + location_info["height"] 
@@ -117,10 +124,21 @@ for img_id, line in enumerate(json_list) :
         obj_mask["counts"] = [x_max, y_max, x_min, y_min]
         object_masks_list.append(obj_mask)
         
-        feature_vector = [0 for j in range(2)]   #* num of target attribute
+        feature_vector = [0 for j in range(43)]   #@ len of target attribute, total is 43
         
         obj_values = list(obj.values())   ### dict_keys type is not iterable
-        feature_vector[att_bind[obj_values[10]]] = 1   #* only use 선수상황 class
+                                                        #@ only for player attributes code
+                                                        #@                 0         1        2        3        4        5        6       7        8        9         10              11        12
+                                                        #@ obj_values = {"type","location","선수선택","선수상황","선수성별","선수연령","선수방향","선수자세","선수동작","선수행동","선수위치(진영)","선수위치(라인)","선수소속"}
+        # for idx in [10, 12] :                         #@ choose indices to select as target atts
+        for idx in [3, 6, 7, 8, 9, 10, 11, 12] :                          #@ use total attributes
+            if obj_values[idx] == "기타" :   
+                if idx == 7 :
+                    obj_values[idx] = "선수자세기타"
+                if idx == 8 :
+                    obj_values[idx] = "선수동작기타"
+            feature_vector[att_bind[obj_values[idx]]] = 1     #* (ex) feature_vector[att_bind["공격"]] = feature_vector[7] = 1
+
         feature_vectors_list.append(feature_vector)
 
 basketball_obj_json = dict()
@@ -130,7 +148,8 @@ basketball_obj_json["image_name"] = image_name_list
 basketball_obj_json["feature_vectors"] = feature_vectors_list
 basketball_obj_json["scores"] = scores_list
             
-with open("/data/ahngeo11/nia/attnet/annotations/basketball_obj_zone.json", 'w') as f :
+            
+with open("/data/ahngeo11/nia/attnet/annotations/basketball_obj_player.json", 'w') as f :   #@ output annotation file path
     json.dump(basketball_obj_json, f)
                     
 # with open("/data/ahngeo11/nia/attnet/annotations/basketball_mini_except_ls.txt", 'w') as f :
