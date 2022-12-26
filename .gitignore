@@ -260,8 +260,8 @@ attnet/.vscode/
 attnet/scene_parse/attr_net/tools/test_results/
 
 attnet/annoations/basketball_except_ls.txt
-attnet/slurm/logs/before
-attnet/slurm/sh
+attnet/slurm/logs/
+attnet/slurm/sh/
 attnet/output/
 !attnet/scene_parse/attr_net/tools/test_results/basketball_gt_train_zone.json
 !attnet/scene_parse/attr_net/tools/test_results/show_test_acc.py

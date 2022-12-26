@@ -8,12 +8,19 @@
 #SBATCH --partition batch_sw_ugrad
 #SBATCH -o slurm-%A_%a_%x.out
 
+# --bs = per gpu batch size, use default lr 0.002 with linear scaling
+#@ --lr = 0.002 * totalbatchsize / 50 
+
+ANN_FILE = /data/ahngeo11/nia/attnet/annotations/basketball_obj.json
+OUTPUT_DIR = /data/ahngeo11/nia/attnet/output
+NUM_ITERS = 25000
+FEATURE_VEC_LEN = 43
+
 python -m torch.distributed.launch --nproc_per_node 4 \
     --master_port 12330 \
     scene_parse/attr_net/tools/run_train.py \
-        --dataset basketball --num_iters 50000
-        --run_dir /data/ahngeo11/nia/attnet/output \
+        --dataset basketball --num_iters $NUM_ITERS
+        --run_dir $OUTPUT_DIR \
         --basketball_img_dir /local_datasets/detectron2/basketball/jpg \
-        --basketball_ann_path /data/ahngeo11/nia/attnet/annotations/basketball_obj.json \
-        --batch_size 10 --learning_rate 0.0016 \  # per gpu batch size, use default lr 0.002 with linear scaling
-        --num_workers 8
+        --basketball_ann_path $ANN_FILE --feature_vector_len $FEATURE_VEC_LEN \
+        --batch_size 16 --learning_rate 0.0016 --num_workers 8 --val_epochs 5 

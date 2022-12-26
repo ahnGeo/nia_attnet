@@ -32,9 +32,10 @@ class BaseOptions():
         self.parser.add_argument('--local_rank', type=int)
         self.parser.add_argument('--dist_url', default='env://',
                         help='url used to set up distributed training')
-        
         self.initialized = True
         #@@@@@@@@@@@@@@@@@@@@@@@@@      DONT TOUCH@@@@@@@@@@@@@@@@@@@@@@@@@@@
+        self.parser.add_argument("--feature_vector_len", type=int, help='for model\'s output layer')  #^## for model.py initializing output layer
+        
     def parse(self):
         # initialize parser
         if not self.initialized:
@@ -81,7 +82,7 @@ class TrainOptions(BaseOptions):
         self.parser.add_argument('--num_iters', default=100, type=int, help='total number of iterations')
         self.parser.add_argument('--display_every', default=20, type=int, help='display training information every N iterations')
         self.parser.add_argument('--checkpoint_every', default=1000, type=int, help='save every N iterations')
-        self.parser.add_argument('--val_epochs', default=20, type=int, help='do validation')
+        self.parser.add_argument('--val_epochs', default=20, type=int, help='do validation')    #^## for validation per k epochs
         self.parser.add_argument('--shuffle_data', default=1, type=int, help='shuffle dataloader')
         self.is_train = True
 

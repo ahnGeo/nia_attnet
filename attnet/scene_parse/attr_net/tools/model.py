@@ -26,12 +26,18 @@ class AttributeNetwork(nn.Module):
             self.net.load_state_dict(checkpoint['model_state'])
         else:
             print('| creating new model')
-            output_dims = {
-                'clevr': 18,
-                'basketball': 2,  #*(temp) for one att
-                'basketball_mini' : 2
-            }
-            self.output_dim = output_dims[opt.dataset]
+            
+            if "clevr" in opt.dataset:
+                output_dims = {
+                    'clevr': 18
+                }
+                self.output_dim = output_dims[opt.dataset]
+                
+            #* for ours
+            if "basketball" in opt.dataset:
+                self.output_dim = opt.feature_vector_len
+                print("| output dimension is %d" % opt.feature_vector_len) 
+            
             self.net = _Net(self.output_dim, self.input_channels).to("cuda")
 
         self.criterion = nn.MSELoss()
