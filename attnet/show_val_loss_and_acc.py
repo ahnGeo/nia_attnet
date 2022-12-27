@@ -7,18 +7,24 @@ def val_loss_and_acc(file_path) :
         
     val_loss = []
     val_acc = []
+    train_loss = []
     
     for line in data :
         if "| validation loss" in line :
             val_loss.append(line.split()[-1])
         elif "| validation acc" in line :
-            val_acc.append(line.split()[-1])
+            val_acc.append(line.split(":")[-1][1:-1])
+        elif "| iteration" in line :
+            train_loss.append(line.split()[-1])
     
-    with open("train_results/val_loss_{}.txt".format(file_path.split("/")[-1].split(".")[0]), 'w') as f :
+    with open("train_results/val_loss_{}.txt".format(file_path.split("/")[-1].split(".")[0].split("_")[-1]), 'w') as f :
         f.write("\n".join(val_loss))
         
-    with open("train_results/val_acc_{}.txt".format(file_path.split("/")[-1].split(".")[0]), 'w') as f :
+    with open("train_results/val_acc_{}.txt".format(file_path.split("/")[-1].split(".")[0].split("_")[-1]), 'w') as f :
         f.write("\n".join(val_acc))
+        
+    with open("train_results/train_loss_{}.txt".format(file_path.split("/")[-1].split(".")[0].split("_")[-1]), 'w') as f :
+        f.write("\n".join(train_loss))
         
 if __name__ == "__main__" :
     parser = argparse.ArgumentParser()

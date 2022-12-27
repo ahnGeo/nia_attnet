@@ -41,15 +41,14 @@ class Trainer:
             score = torch.zeros((1, len(att_len_list[1:]))) 
             total = 0
             
-            
-            for data, label in self.train_loader:
+            for data, label in self.train_loader:    #* data.shape (B=6, 6, 1080, 1920)
                 t += 1
                 self.model.set_input(data, label)
                 self.model.step()
 
                 #*####
                 score = torch.add(score, self.model.check_correct(att_len_list))
-                total += self.train_loader.__len__()
+                total += data.shape[0]
                 #*####
 
                 # if t % self.display_every == 0:
