@@ -22,8 +22,11 @@ def get_dataset(opt, split):
         elif split == 'val':
             ds = BasketballDataset(opt.basketball_ann_path, opt.basketball_img_dir,split='val',
                                     min_img_id=opt.split_id, concat_img=opt.concat_img)
+        # elif split == 'test':
+        #     ds = BasketballTestDataset(opt.basketball_test_ann_path, opt.basketball_test_img_dir,split='val',
+        #                             min_img_id=opt.split_id, concat_img=opt.concat_img)
         elif split == 'test':
-            ds = BasketballTestDataset(opt.basketball_test_ann_path, opt.basketball_test_img_dir,split='val',
+            ds = BasketballDataset(opt.basketball_ann_path, opt.basketball_img_dir,split='val',
                                     min_img_id=opt.split_id, concat_img=opt.concat_img)
         else:
             raise ValueError('Invalid dataset split: %s' % split)

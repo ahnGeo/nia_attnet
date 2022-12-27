@@ -9,13 +9,16 @@ def val_loss_and_acc(file_path) :
     val_acc = []
     train_loss = []
     
+    state = 0
     for line in data :
         if "| validation loss" in line :
             val_loss.append(line.split()[-1])
         elif "| validation acc" in line :
             val_acc.append(line.split(":")[-1][1:-1])
         elif "| iteration" in line :
-            train_loss.append(line.split()[-1])
+            if state % 5 == 0 :
+                train_loss.append(line.split()[-1])
+            state += 1
     
     with open("train_results/val_loss_{}.txt".format(file_path.split("/")[-1].split(".")[0].split("_")[-1]), 'w') as f :
         f.write("\n".join(val_loss))
