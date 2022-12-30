@@ -75,6 +75,7 @@ class BasketballDataset(Dataset):
 
         transform_list = [transforms.ToPILImage(),
                           transforms.ToTensor(),
+                        #   transforms.Resize((149, 224)),
                           transforms.Normalize(mean = [0.485, 0.456, 0.406], std = [0.229, 0.224, 0.225])]
         if self.concat_img:
             data = img.clone().resize_(6, img_h, img_w).fill_(0) #! 채널 늘림. 0으로 채움.

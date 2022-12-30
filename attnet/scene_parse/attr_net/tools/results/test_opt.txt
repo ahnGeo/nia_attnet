@@ -1,8 +1,8 @@
 | options
-basketball_ann_path: /data/ahngeo11/nia/attnet/annotations/basketball_obj_player.json
+basketball_ann_path: /data/jong980812/nia/nia_attnet/attnet/annotations/basketball_obj.json
 basketball_img_dir: /local_datasets/detectron2/basketball/annotations/images
-basketball_test_ann_path: /data/ahngeo11/nia/attnet/annotations/basketball_obj_player.json
-basketball_test_img_dir: /local_datasets/detectron2/basketball/annotations/images
+basketball_test_ann_path: /data/ahngeo11/nia/attnet/annotations/basketball_obj.json
+basketball_test_img_dir: /local_datasets/detectron2/basketball/jpg
 batch_size: 8
 clevr_mini_ann_path: ../../data/attr_net/objects/clevr_mini_objs.json
 clevr_mini_img_dir: ../../data/raw/CLEVR_mini/images
@@ -11,10 +11,10 @@ clevr_val_img_dir: ../../data/raw/CLEVR_v1.0/images/val
 concat_img: 1
 dataset: basketball
 dist_url: env://
-feature_vector_len: None
+feature_vector_len: 43
 gpu_ids: 0
 learning_rate: 0.002
-load_checkpoint_path: /data/ahngeo11/nia/attnet/output/attnet-gt-player/checkpoint_best.pt
+load_checkpoint_path: /data/ahngeo11/nia/attnet/output/attnet-gt/checkpoint_best.pt
 local_rank: None
 num_workers: 4
 output_path: result.json
