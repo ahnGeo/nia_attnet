@@ -16,7 +16,7 @@ gpu_ids: 0
 learning_rate: 0.002
 load_checkpoint_path: /data/ahngeo11/nia/attnet/output/attnet-gt/checkpoint_best.pt
 local_rank: None
-num_workers: 4
+num_workers: 16
 output_path: result.json
 run_dir: /data/ahngeo11/nia/attnet/scene_parse/attr_net/tools/results
 shuffle_data: 0

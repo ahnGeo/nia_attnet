@@ -78,4 +78,6 @@ print('| test acc per category : {}'.format(", ".join(acc)))
 print('| test acc total : {}'.format(score_total / total))   
   
  
-#^ 'total' can be more than dataset's len in setting using both ball and player objects 
+#^ 'total' can be more than dataset's len in setting using both ball and player objects
+
+exit(0)

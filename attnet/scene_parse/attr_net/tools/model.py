@@ -90,7 +90,7 @@ class AttributeNetwork(nn.Module):
                 if torch.argmax(self.pred[i][start_idx : end_idx]) == torch.argmax(self.label[i][start_idx : end_idx]) :  
                     score[i, j] += 1
                     
-        score = torch.sum(score, axis=0)  #* score.shape(1, num of atts)
+        score = torch.sum(score, axis=0)  #* score.shape = (1, num of atts)
         
         return score
     #*####
