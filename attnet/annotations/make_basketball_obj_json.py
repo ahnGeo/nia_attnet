@@ -133,14 +133,10 @@ for img_id, line in enumerate(json_list) :
     
     # for i, obj in data["annotations"] :  ### 10 objects in one json file, data["ann"][0] = {dict}
     ################ sorry! attnet use only player and ball imgs
-    for i, obj in enumerate([data["labelinginfo_scene representation"]["경기도구"], data["labelinginfo_scene representation"]["집단행동참여자"][0]]) :  #@## ball and player
-    # for i, obj in enumerate([data["labelinginfo_scene representation"]["집단행동참여자"][0]]) :  #@## only player will be inputs
-
-        if i == 0 and len(list(obj.values())) != 4 :    ### there are jsons with insufficient player atts
-            except_list.append(line)
-            continue
-        
-        if i == 1 and len(list(obj.values())) != 13 :    ### there are jsons with insufficient player atts
+    # for i, obj in enumerate([data["labelinginfo_scene representation"]["경기도구"], data["labelinginfo_scene representation"]["집단행동참여자"][0]]) :  #@## ball and player
+    for i, obj in enumerate([data["labelinginfo_scene representation"]["집단행동참여자"][0]]) :  #@## only player will be inputs
+    
+        if len(list(obj.values())) != 13 :    ### there are jsons with insufficient player atts
             except_list.append(line)
             continue
         
@@ -171,22 +167,17 @@ for img_id, line in enumerate(json_list) :
         feature_vector = [0 for j in range(43)]   #@ len of target attribute, total is 43
         
         obj_values = list(obj.values())   ### dict_keys type is not iterable
-        
-        if i == 1 :
-            #@ for player attributes
-            #@                 0         1        2        3        4        5        6       7        8        9         10              11        12
-            #@ obj_values = {"type","location","선수선택","선수상황","선수성별","선수연령","선수방향","선수자세","선수동작","선수행동","선수위치(진영)","선수위치(라인)","선수소속"}
-            # for idx in [10, 12] :    #@ choose indices to select as target atts
-            for idx in [3, 6, 7, 8, 9, 10, 11, 12] :   #@ use total attributes about player
-                if obj_values[idx] == "기타" :   
-                    if idx == 7 :
-                        obj_values[idx] = "선수자세기타"
-                    if idx == 8 :
-                        obj_values[idx] = "선수동작기타"
-                feature_vector[att_bind[obj_values[idx]]] = 1     #* (ex) feature_vector[att_bind["공격"]] = feature_vector[7] = 1
-        elif i == 0 :   #@ for ball attribute
-            #@ obj_values = {"type", "location", "label", "공위치"}
-            feature_vector[att_bind[obj_values[3]]] = 1
+                                                        #@ only for player attributes code
+                                                        #@                 0         1        2        3        4        5        6       7        8        9         10              11        12
+                                                        #@ obj_values = {"type","location","선수선택","선수상황","선수성별","선수연령","선수방향","선수자세","선수동작","선수행동","선수위치(진영)","선수위치(라인)","선수소속"}
+        # for idx in [10, 12] :                         #@ choose indices to select as target atts
+        for idx in [3, 6, 7, 8, 9, 10, 11, 12] :                          #@ use total attributes
+            if obj_values[idx] == "기타" :   
+                if idx == 7 :
+                    obj_values[idx] = "선수자세기타"
+                if idx == 8 :
+                    obj_values[idx] = "선수동작기타"
+            feature_vector[att_bind[obj_values[idx]]] = 1     #* (ex) feature_vector[att_bind["공격"]] = feature_vector[7] = 1
 
         feature_vectors_list.append(feature_vector)
 

@@ -277,6 +277,7 @@ attnet/annotations/basketball_mini_except_ls.txt
 attnet/annotations/old_basketball_obj.json
 attnet/debugging_img/
 attnet/train_results/
+attnet/scene_parse/attr_net/tools/results/
 
 yolov5/runs
 yolov5/slurm/logs/
