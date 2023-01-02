@@ -121,7 +121,7 @@ class _Net(nn.Module):
     def __init__(self, output_dim, input_channels=6):
         super(_Net, self).__init__()
 
-        resnet = models.resnet34(pretrained=True)
+        resnet = models.resnet50(pretrained=True)
         layers = list(resnet.children())
         
         # remove the last layer

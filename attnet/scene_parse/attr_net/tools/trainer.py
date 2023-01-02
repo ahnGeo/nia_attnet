@@ -56,14 +56,14 @@ class Trainer:
                 #     print('| iteration %d / %d, epoch %d, loss %f' % (t, self.num_iters, epoch, loss))
                 #     self.stats['train_losses_ts'].append(t)
 
-                if t % self.checkpoint_every == 0 or t >= self.num_iters:
-                    print('| saving checkpoint')
-                    self.model.save_checkpoint('%s/checkpoint_iter%08d.pt' %
-                                                (self.run_dir, t),self.opt)
-                    self.model.save_checkpoint(os.path.join(self.run_dir, 'checkpoint.pt'),self.opt)
-                    with open('%s/stats.json' % self.run_dir, 'w') as fout:
-                        json_errors = {k: str(v) for k, v in self.stats.items()}
-                        json.dump(json_errors, fout)
+                # if t % self.checkpoint_every == 0 or t >= self.num_iters:
+                #     print('| saving checkpoint')
+                #     self.model.save_checkpoint('%s/checkpoint_iter%08d.pt' %
+                #                                 (self.run_dir, t),self.opt)
+                #     self.model.save_checkpoint(os.path.join(self.run_dir, 'checkpoint.pt'),self.opt)
+                #     with open('%s/stats.json' % self.run_dir, 'w') as fout:
+                #         json_errors = {k: str(v) for k, v in self.stats.items()}
+                #         json.dump(json_errors, fout)
 
                 if t >= self.num_iters:
                     break

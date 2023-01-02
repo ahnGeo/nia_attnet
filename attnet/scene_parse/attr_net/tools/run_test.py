@@ -10,7 +10,7 @@ import utils
 opt = get_options('test')
 test_loader = get_dataloader(opt, 'test')
 model = get_model(opt)
-ㄴ
+
 
 if opt.dataset == 'clevr':
     scenes = [{
