@@ -121,7 +121,7 @@ class _Net(nn.Module):
     def __init__(self, output_dim, input_channels=6):
         super(_Net, self).__init__()
 
-        resnet = models.resnet34(pretrained=True)
+        resnet = models.resnet101(pretrained=True)
         layers = list(resnet.children())
         
         # remove the last layer
@@ -131,7 +131,7 @@ class _Net(nn.Module):
         layers.insert(0, nn.Conv2d(input_channels, 64, kernel_size=(7, 7), stride=(2, 2), padding=(3, 3), bias=False))
 
         self.main = nn.Sequential(*layers)
-        self.final_layer = nn.Linear(512, output_dim)
+        self.final_layer = nn.Linear(2048, output_dim)
 
     def forward(self, x):
         x = self.main(x)
