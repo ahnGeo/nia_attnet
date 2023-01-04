@@ -66,6 +66,7 @@ class Trainer:
                 #         json.dump(json_errors, fout)
 
                 if t >= self.num_iters:
+                    self.model.save_checkpoint('%s/checkpoint_latest.pt' % self.run_dir,self.opt)
                     break
                 
             #*## get train loss and acc for every epoch

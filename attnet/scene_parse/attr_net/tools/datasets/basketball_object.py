@@ -72,7 +72,7 @@ class BasketballDataset(Dataset):
             seg[i, :, :] = img[i, :, :] * mask  #! masking, * in numpy == element-wise mult
 #!################################################################################
 
-        resize_h, resize_w = 270, 480      #@ for resizing
+        resize_h, resize_w = 224, 320      #@ for resizing
         
         transform_list = [transforms.ToPILImage(),
                           transforms.ToTensor(),

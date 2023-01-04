@@ -8,6 +8,10 @@ from ddp import init_distributed_mode
 import torch.backends.cudnn as cudnn
 import torch.distributed as dist
 import torch
+
+#!###################
+torch.manual_seed(777)
+
 def main(opt):
     
     init_distributed_mode(opt)
