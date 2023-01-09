@@ -2,17 +2,56 @@ import os
 import json
 
 from options import get_options
-from datasets import get_dataloader
+from datasets import get_dataset
 from model import get_model
-import utils 
+
+from ddp import init_distributed_mode
+import torch.backends.cudnn as cudnn
+import torch.distributed as dist
 
 import torch
 
 opt = get_options('test')
-train_loader = get_dataloader(opt, 'train')
-test_loader = get_dataloader(opt, 'test')
+
+init_distributed_mode(opt)
+train_datasets = get_dataset(opt, 'train')
+test_datasets = get_dataset(opt, 'test')
+
+cudnn.benchmark = True
+global_rank=dist.get_rank()
+num_tasks=dist.get_world_size()
+sampler_train=torch.utils.data.DistributedSampler(
+train_datasets,num_replicas=num_tasks, rank=global_rank, shuffle=True
+)
+sampler_test = torch.utils.data.DistributedSampler(
+test_datasets, num_replicas=num_tasks, rank=global_rank, shuffle=False)
+
+train_loader = torch.utils.data.DataLoader(
+train_datasets, sampler=sampler_train,
+batch_size=opt.batch_size,
+num_workers=opt.num_workers,
+pin_memory=True,
+drop_last=True,
+collate_fn=None,
+)
+test_loader = torch.utils.data.DataLoader(
+    test_datasets, sampler=sampler_test,
+    batch_size=opt.batch_size,
+    num_workers=opt.num_workers,
+    pin_memory=True,
+    drop_last=False
+)
+
+total_batch_size = opt.batch_size  * dist.get_world_size()
+print(f"total_batch_size is {total_batch_size}")
+print(f"Opt \n\n {opt}")
+
 model = get_model(opt)
-model.eval_mode()
+device = torch.device(opt.gpu)
+model.to(device)
+model = torch.nn.parallel.DistributedDataParallel(model, device_ids=[opt.gpu], find_unused_parameters=True)
+model = model.module
+
 model.eval()
 
 att_len_list = [0, 7, 2, 4, 8, 7, 8, 2, 3, 2]
