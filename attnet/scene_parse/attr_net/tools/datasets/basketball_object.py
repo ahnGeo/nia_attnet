@@ -59,10 +59,11 @@ class BasketballDataset(Dataset):
 ##########! pixel masking with bbox ####################################
         xmax, ymax, xmin, ymin = self.obj_masks[idx]["counts"]   ### box_coords = [x1, y1, x2, y2]
         img_w, img_h = self.obj_masks[idx]["size"]
+     
         mask = np.zeros((img_w, img_h), dtype=float)  #* mask = (1920, 1080)
         
-        for x_idx in range(xmin, xmax) :
-            for y_idx in range(ymin, ymax) :
+        for x_idx in range(xmin - 1, xmax) :   #* zero-indexing
+            for y_idx in range(ymin - 1, ymax) :   #* zero-indexing
                 mask[x_idx, y_idx] = 1.0
         
         mask = mask.transpose()   #* img.shape = (1080, 1920)
@@ -72,18 +73,19 @@ class BasketballDataset(Dataset):
             seg[i, :, :] = img[i, :, :] * mask  #! masking, * in numpy == element-wise mult
 #!################################################################################
 
+        resize_h, resize_w = 270, 480      #@ for resizing
+        
         transform_list = [transforms.ToPILImage(),
                           transforms.ToTensor(),
-                          transforms.Resize((270, 480)),   #*## 1080, 1920 -> 270, 480
+                          transforms.Resize((resize_h, resize_w)),   #*## 1080, 1920 -> 270, 480
                           transforms.Normalize(mean = [0.485, 0.456, 0.406], std = [0.229, 0.224, 0.225])]
         if self.concat_img:
-            data = img.clone().resize_(6, 270, 480).fill_(0) #! make 6 channel
+            data = img.clone().resize_(6, resize_h, resize_w).fill_(0) #! make 6 channel
             data[0:3] = transforms.Compose(transform_list)(seg)
             data[3:6] = transforms.Compose(transform_list)(img)
         else:
             data = img.clone().resize_.fill_(0)
             data[:, :, :] = transforms.Compose(transform_list)(seg)
-        
         return data, label
     
     
