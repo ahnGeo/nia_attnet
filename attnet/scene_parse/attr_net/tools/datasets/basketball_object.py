@@ -61,8 +61,11 @@ class BasketballDataset(Dataset):
         img_w, img_h = self.obj_masks[idx]["size"]
         mask = np.zeros((img_w, img_h), dtype=float)  #* mask = (1920, 1080)
         
-        for x_idx in range(xmin, xmax) :
-            for y_idx in range(ymin, ymax) :
+        if xmax > 1920 :
+            xmax == 1920
+        
+        for x_idx in range(xmin - 1, xmax) :
+            for y_idx in range(ymin - 1, ymax) :
                 mask[x_idx, y_idx] = 1.0
         
         mask = mask.transpose()   #* img.shape = (1080, 1920)
@@ -72,8 +75,8 @@ class BasketballDataset(Dataset):
             seg[i, :, :] = img[i, :, :] * mask  #! masking, * in numpy == element-wise mult
 #!################################################################################
 
-        resize_h, resize_w = 224, 320      #@ for resizing
-        
+        resize_h, resize_w = 270, 480      #@ for resizing
+                
         transform_list = [transforms.ToPILImage(),
                           transforms.ToTensor(),
                           transforms.Resize((resize_h, resize_w)),   #*## 1080, 1920 -> 270, 480

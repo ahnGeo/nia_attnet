@@ -46,10 +46,10 @@ class Trainer:
                 self.model.set_input(data, label)
                 self.model.step()
 
-                #*####
-                score = torch.add(score, self.model.check_correct(att_len_list))
-                total += data.shape[0]
-                #*####
+                # #*####
+                # score = torch.add(score, self.model.check_correct(att_len_list))
+                # total += data.shape[0]
+                # #*####
 
                 # if t % self.display_every == 0:
                 #     self.stats['train_losses'].append(loss)
@@ -73,11 +73,11 @@ class Trainer:
             loss = self.model.get_loss()
             self.stats['train_losses'].append(loss)
             print('| iteration %d / %d, epoch %d, loss %f' % (t, self.num_iters, epoch, loss))
-            score = torch.flatten(score)
-            acc = [str(float(score[i] / total))[:8] for i in range(score.shape[0])]
-            print("| train acc : {}".format(", ".join(acc)))
-            self.stats['train_acc'].append(", ".join(acc))
-            self.stats['train_losses_ts'].append(t)
+            # score = torch.flatten(score)
+            # acc = [str(float(score[i] / total))[:8] for i in range(score.shape[0])]
+            # print("| train acc : {}".format(", ".join(acc)))
+            # self.stats['train_acc'].append(", ".join(acc))
+            # self.stats['train_losses_ts'].append(t)
             
             #*## validation epoch
             if epoch % self.val_epochs == 0 :

@@ -1,5 +1,4 @@
 import sys
-sys.path.append("/data/jongseo/lab/ns-vqa/scene_parse/attr_net/datasets")
 from options import get_options
 from datasets import get_dataloader,get_dataset
 from model import get_model
@@ -45,7 +44,6 @@ def main(opt):
         )
     total_batch_size = opt.batch_size  * dist.get_world_size()
     print(f"total_batch_size is {total_batch_size}")
-    print(f"Opt \n\n {opt}")
     model = get_model(opt)
     device = torch.device(opt.gpu)
     model.to(device)
