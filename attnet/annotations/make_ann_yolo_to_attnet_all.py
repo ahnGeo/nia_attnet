@@ -64,17 +64,19 @@ def get_iou(detected_bbox, gt_bbox, img_w, img_h) :
 # iou_threshold = args.iou
 
 #* Load train/val set list
-with open("/data/ahngeo11/nia/attnet/annotations/train_ls.txt", 'r') as f :   #@ if use mini dataset, path is "train_mini_ls.txt"
+with open("/data/ahngeo11/nia/attnet/annotations/all-train-mini-ls.txt", 'r') as f :   #@ if use mini dataset, path is "train_mini_ls.txt"
     train_list = f.readlines()
     for i in range(len(train_list)) :
         train_list[i] = train_list[i].split(".")[0]
         
-with open("/data/ahngeo11/nia/attnet/annotations/val_ls.txt", 'r') as f :
+with open("/data/ahngeo11/nia/attnet/annotations/all-val-mini-ls.txt", 'r') as f :
     val_list = f.readlines()
-
+    for i in range(len(val_list)) :
+        val_list[i] = val_list[i].split(".")[0]
+    
 json_list = train_list + val_list
-root_dir = "/local_datasets/detectron2/basketball/annotations"
-yolo_dir = "/local_datasets/detectron2/basketball/yolo_results"
+root_dir = "/local_datasets/nia/json"
+yolo_dir = "/local_datasets/nia/yolo"
 
 object_masks_list = []
 image_idxs_list = []
@@ -89,18 +91,18 @@ except_list = []
 for img_id, line in enumerate(json_list) :
     
     # if img_id < 960 :   #@ basketball_mini train set num = 960
-    if img_id < 15315 :   #@ basketball train set num - 15315
+    if img_id < 1353 :   #@ basketball train set num - 15315
         split = "train"
     else :
         split = "val"
     
     line = line.strip('\n')
     
-    with open(root_dir + "/{}_json/".format(split) + line + ".json", 'r') as f :
+    with open(root_dir + "/{}/" + line + ".json", 'r') as f :
         ann_data = json.load(f)
     
-    if os.path.exists(yolo_dir + "/{}/labels/".format(split) + line + ".txt") :  
-        with open(yolo_dir + "/{}/labels/".format(split) + line + ".txt", 'r') as f :
+    if os.path.exists(yolo_dir + "/{}/".format(split) + line + ".txt") :  
+        with open(yolo_dir + "/{}/".format(split) + line + ".txt", 'r') as f :
             detection_data = f.readlines()
     else :
         except_list.append(line)
@@ -108,9 +110,18 @@ for img_id, line in enumerate(json_list) :
     
     img_obj_dict = {"player" : {"dicts" : [], "scores" : []}, "ball" : {"dicts" : [], "scores" : []}}
     
-    for detected_obj in detection_data :
-        if detected_obj.split()[0] == "0" :   #* player
-            obj = ann_data["labelinginfo_scene representation"]["집단행동참여자"][0]
+    #*************************************
+    ann_list = []
+    for ann in ann_data["annotation"] :   #* store all anns about players
+        if list(ann.keys())[0] == "box" :
+            if ann["box"]["label"] in ["선수", "1루심", "3루심", "구심"] :
+                ann = ann["box"]
+                ann_list.append(ann)
+    
+    #*************************************
+    for detected_obj in detection_data :      #* load yolo detection results about all objs
+        if detected_obj.split()[0] == "0" :   #* get only results about "player" 
+            for obj in ann_list :
             
             if len(list(obj.values())) != 13 :    ### there are jsons with insufficient player anns
                 except_list.append(line)
@@ -155,44 +166,44 @@ for img_id, line in enumerate(json_list) :
 
             obj_dict["feature_vectors"] = feature_vector
             
-        elif detected_obj.split()[0] == "1" :   #* ball
-            obj = ann_data["labelinginfo_scene representation"]["경기도구"]
+        # elif detected_obj.split()[0] == "1" :   #* ball
+        #     obj = ann_data["labelinginfo_scene representation"]["경기도구"]
             
-            if len(list(obj.values())) != 4 :  
-                except_list.append(line)
-                continue
+        #     if len(list(obj.values())) != 4 :  
+        #         except_list.append(line)
+        #         continue
             
-            obj_dict = {}
+        #     obj_dict = {}
             
-            img_w, img_h = 1920, 1080
+        #     img_w, img_h = 1920, 1080
             
-            iou = get_iou(detected_obj.split()[1:], obj["location"], img_w, img_h)
+        #     iou = get_iou(detected_obj.split()[1:], obj["location"], img_w, img_h)
 
-            # if iou < iou_threshold :
-            #     continue
+        #     # if iou < iou_threshold :
+        #     #     continue
             
-            obj_dict["image_idxs"] = img_id
-            obj_dict["image_name"] = ann_data["metaData"]["농구메타데이터"]
-            obj_dict["iou_scores"] = iou
-            obj_type = "ball"
-            obj_dict["object_types"] = obj_type
+        #     obj_dict["image_idxs"] = img_id
+        #     obj_dict["image_name"] = ann_data["metaData"]["농구메타데이터"]
+        #     obj_dict["iou_scores"] = iou
+        #     obj_type = "ball"
+        #     obj_dict["object_types"] = obj_type
             
-            obj_mask = dict()
-            obj_mask["size"] = [1920, 1080]
+        #     obj_mask = dict()
+        #     obj_mask["size"] = [1920, 1080]
             
-            yolo_x, yolo_y, yolo_w, yolo_h = detected_obj.split()[1:]
-            yolo_x, yolo_y, yolo_w, yolo_h = float(yolo_x), float(yolo_y), float(yolo_w), float(yolo_h)
-            x_max, x_min, y_max, y_min, _, _ = get_yolo_box_coords(yolo_x, yolo_y, yolo_w, yolo_h, img_w, img_h) 
+        #     yolo_x, yolo_y, yolo_w, yolo_h = detected_obj.split()[1:]
+        #     yolo_x, yolo_y, yolo_w, yolo_h = float(yolo_x), float(yolo_y), float(yolo_w), float(yolo_h)
+        #     x_max, x_min, y_max, y_min, _, _ = get_yolo_box_coords(yolo_x, yolo_y, yolo_w, yolo_h, img_w, img_h) 
 
-            obj_mask["counts"] = [x_max, y_max, x_min, y_min]
-            obj_dict["object_masks"] = obj_mask
+        #     obj_mask["counts"] = [x_max, y_max, x_min, y_min]
+        #     obj_dict["object_masks"] = obj_mask
             
-            feature_vector = [0 for j in range(43)]   #@ len of target attribute, total is 43
+        #     feature_vector = [0 for j in range(43)]   #@ len of target attribute, total is 43
             
-            obj_values = list(obj.values())   ### dict_keys type is not iterable
+        #     obj_values = list(obj.values())   ### dict_keys type is not iterable
 
-            feature_vector[att_bind[obj_values[3]]] = 1   
-            obj_dict["feature_vectors"] = feature_vector
+        #     feature_vector[att_bind[obj_values[3]]] = 1   
+        #     obj_dict["feature_vectors"] = feature_vector
             
         else :
             continue

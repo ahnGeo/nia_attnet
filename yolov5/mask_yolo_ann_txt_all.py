@@ -1,11 +1,30 @@
 import json
 
 class_bind = {
-    "농구공" : 1,
+    "선수" : 0,
+    "공" : 1,
     "경기장" : 2,
     "3점라인" : 5,
     "페인트존" : 3,
-    "골대" : 4
+    "골대" : 4,
+    "전위" : 6,
+    "후위" : 7,
+    "네트" : 8,
+    "골에어리어" : 9,
+    "1루베이스" : 10,
+    "2루베이스" : 11,
+    "3루베이스" : 12,
+    "홈베이스" : 13,
+    "마운드" : 14,
+    "타석" : 15,
+    "내야" : 16,
+    "1루심" : 17,
+    "3루심" : 18,
+    "구심" : 19,
+    "코너에어리어" : 20,
+    "페널티에어리어" : 21,
+    "페널티마크" : 22,
+    "페널티아크" : 23   
 }
 
 # Goal : class / x_center / y_center / width / height
@@ -71,62 +90,44 @@ def register_polygon_object(obj_ann_list, object_dict, img_w, img_h) :
 
 
 # json_list = ["A01_AA01_T002_220916_CH01_X01_f001838.json"]
-with open("json_ls.txt", 'r') as f :
+with open("/data/ahngeo11/nia/yolov5/new_json_ls.txt", 'r') as f :
     json_list = f.readlines()
 
-root_dir = "/local_datasets/detectron2/basketball"
+root_dir = "/local_datasets/nia"
 
 ball_location_empty_list = []
     
 for line in json_list :
-    line = line[:-1]  ### remove \n
+    line = line.strip('\n')  ### remove \n
     with open(root_dir + "/json/" + line, 'r') as f :
         data = json.load(f)
+        
+    print(line)
         
     obj_ann_per_img = []    
     state_not_empty = True
     
     img_w = data["imageinfo"]["width"]
     img_h = data["imageinfo"]["height"]
-        
-    for key in data["labelinginfo_scene representation"].keys() :
-        if key == "집단행동참여자" :
-            for object_dict in data["labelinginfo_scene representation"][key] :  ### [{}]
-                assert object_dict["type"] == "box"
-                cls_id = 0   ### category == person == 0
-                x_center = float(object_dict["location"]["x"])
-                y_center = float(object_dict["location"]["y"])
-                width = float(object_dict["location"]["width"])
-                height = float(object_dict["location"]["height"])
-                register_box_object(obj_ann_per_img, object_dict, img_w, img_h, cls_id)
-            
-        elif key == "환경" : 
-            object_dict = data["labelinginfo_scene representation"]["환경"]["경기장"]
-            assert object_dict["type"] == "polygon"
-            register_polygon_object(obj_ann_per_img, object_dict, img_w, img_h)                                     
-            
-            for key in data["labelinginfo_scene representation"]["환경"]["경기라인"] :
-                object_dict = data["labelinginfo_scene representation"]["환경"]["경기라인"][key]
-                assert object_dict["type"] == "polygon"
-                register_polygon_object(obj_ann_per_img, object_dict, img_w, img_h)    
-                
+          
+    for obj in data["annotation"] :
+        object_dict = obj[list(obj.keys())[0]]
+        if not object_dict["location"] == [] :
+            if object_dict["type"] == "box" :  
+                register_box_object(obj_ann_per_img, object_dict, img_w, img_h)                                     
+            elif object_dict["type"] == "polygon" :
+                register_polygon_object(obj_ann_per_img, object_dict, img_w, img_h)                                     
         else :
-            object_dict = data["labelinginfo_scene representation"][key]
-            if not object_dict["location"] == {} :
-                if object_dict["type"] == "box" :  
-                    register_box_object(obj_ann_per_img, object_dict, img_w, img_h)                                     
-                elif object_dict["type"] == "polygon" :
-                    register_polygon_object(obj_ann_per_img, object_dict, img_w, img_h)                                     
-            else :
-                state_not_empty = False
-                ball_location_empty_list.append(line)
-                continue
+            state_not_empty = False
+            ball_location_empty_list.append(line)
+            continue
+        
             
     if state_not_empty == True :
-        with open("/local_datasets/detectron2/basketball/yolo_results/" + line[:-5] + ".txt", 'w') as f :
+        with open("/local_datasets/nia/jpg/" + line[:-5] + ".txt", 'w') as f :
             f.writelines("\n".join(obj_ann_per_img))
             
-# with open("/data/ahngeo11/nia/yolov5/data/annotations/basketball/ball_location_empty_list.txt", 'w') as f :
-#     f.writelines("\n".join(ball_location_empty_list))
+with open("/data/ahngeo11/nia/yolov5/data/annotations/all/location_empty_list.txt", 'w') as f :
+    f.writelines("\n".join(ball_location_empty_list))
 
                     

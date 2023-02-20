@@ -259,7 +259,6 @@ attnet/__pycache__/
 attnet/.vscode/
 attnet/scene_parse/attr_net/tools/test_results/
 
-attnet/annoations/basketball_except_ls.txt
 attnet/slurm/logs/
 attnet/slurm/sh/
 attnet/output/
@@ -278,6 +277,21 @@ attnet/annotations/old_basketball_obj.json
 attnet/debugging_img/
 attnet/train_results/
 attnet/scene_parse/attr_net/tools/results/
+
+attnet/.vscode/
+attnet/annotations/gt_anns/
+attnet/annotations/yolo_anns/
+attnet/annotations/except_list/
+attnet/debugging_img/
+attnet/output/
+attnet/slurm/
+attnet/train_results/
+attnet/visualization/img/
+attnet/sbatch*.sh
+attnet/show_val_loss_and_acc.py
+attnet/slack_job_alram.py
+*/__pycache__/
+attnet/scene_parse/attr_net/tools/results
 
 yolov5/runs
 yolov5/slurm/logs/

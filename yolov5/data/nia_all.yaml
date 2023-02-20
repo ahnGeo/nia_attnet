@@ -1,0 +1,31 @@
+path: /local_datasets/nia  # dataset root dir
+train: jpg/train  # train images (relative to 'path') 128 images
+val: jpg/val  # val images (relative to 'path') 128 images
+test:  # test images (optional)
+
+# Classes (80 COCO classes)
+names:
+  0: person
+  1: ball
+  2: stadium
+  3: paintzone
+  4: goalpost
+  5: threepointsline
+  6: forward
+  7: backward
+  8: net
+  9: goalarea
+  10: firstbase
+  11: secondbase
+  12: thirdbase
+  13 : homebase
+  14: mound
+  15: battersbox
+  16: infield
+  17: firstbaseumpire
+  18: thirdbaseumpire
+  19: homeplateumpire
+  20: cornerarea
+  21: penaltyarea
+  22: penaltymark
+  23: penaltyarc
