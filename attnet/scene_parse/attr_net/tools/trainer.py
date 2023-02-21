@@ -38,8 +38,8 @@ class Trainer:
         while t < self.num_iters:
             epoch += 1
             
-            score = torch.zeros((1, len(att_len_list[1:]))) 
-            total = 0
+            # score = torch.zeros((1, len(att_len_list[1:]))) 
+            # total = 0
             
             for data, label in self.train_loader:    #* data.shape (B=6, 6, 1080, 1920)
                 t += 1

@@ -8,7 +8,7 @@ import numpy as np
 # args = parser.parse_args()
 
 #* for use all attributes
-attributes_path = "/data/ahngeo11/nia/attnet/annotations/basketball_attributes_all.json"
+attributes_path = "/data/ahngeo11/nia/attnet/annotations/all_attributes.json"
 with open(attributes_path, 'r') as f :
     att_bind = json.load(f)
  
@@ -98,11 +98,11 @@ for img_id, line in enumerate(json_list) :
     
     line = line.strip('\n')
     
-    with open(root_dir + "/{}/" + line + ".json", 'r') as f :
+    with open(root_dir + "/" + line + ".json", 'r') as f :
         ann_data = json.load(f)
     
-    if os.path.exists(yolo_dir + "/{}/".format(split) + line + ".txt") :  
-        with open(yolo_dir + "/{}/".format(split) + line + ".txt", 'r') as f :
+    if os.path.exists(yolo_dir + "/" + line + ".txt") :  
+        with open(yolo_dir + "/" + line + ".txt", 'r') as f :
             detection_data = f.readlines()
     else :
         except_list.append(line)
@@ -114,7 +114,8 @@ for img_id, line in enumerate(json_list) :
     ann_list = []
     for ann in ann_data["annotation"] :   #* store all anns about players
         if list(ann.keys())[0] == "box" :
-            if ann["box"]["label"] in ["선수", "1루심", "3루심", "구심"] :
+            # if ann["box"]["label"] in ["선수", "1루심", "3루심", "구심"] :
+            if ann["box"]["label"] == "선수" :
                 ann = ann["box"]
                 ann_list.append(ann)
     
@@ -122,50 +123,69 @@ for img_id, line in enumerate(json_list) :
     for detected_obj in detection_data :      #* load yolo detection results about all objs
         if detected_obj.split()[0] == "0" :   #* get only results about "player" 
             for obj in ann_list :
-            
-            if len(list(obj.values())) != 13 :    ### there are jsons with insufficient player anns
-                except_list.append(line)
-                continue
-            
-            obj_dict = {}
-            
-            img_w, img_h = 1920, 1080
-            
-            iou = get_iou(detected_obj.split()[1:], obj["location"], img_w, img_h)
-            
-            # if iou < iou_threshold :
-            #     continue
+                if len(list(obj["value"].values())) != 9 :    ### there are jsons with insufficient player anns
+                    except_list.append(line)
+                    continue
+                
+                obj_dict = {}
+                
+                img_w, img_h = 1920, 1080
+                
+                iou = get_iou(detected_obj.split()[1:], obj["location"][0], img_w, img_h)
+                
+                # if iou < iou_threshold :
+                #     continue
 
-            obj_dict["image_idxs"] = img_id
-            obj_dict["image_name"] = ann_data["metaData"]["농구메타데이터"]
-            obj_dict["iou_scores"] = iou
-            obj_type = "player"
-            obj_dict["object_types"] = "player"
-            
-            obj_mask = dict()
-            obj_mask["size"] = [img_w, img_h]
-            
-            yolo_x, yolo_y, yolo_w, yolo_h = detected_obj.split()[1:]
-            yolo_x, yolo_y, yolo_w, yolo_h = float(yolo_x), float(yolo_y), float(yolo_w), float(yolo_h)
-            x_max, x_min, y_max, y_min, _, _ = get_yolo_box_coords(yolo_x, yolo_y, yolo_w, yolo_h, img_w, img_h) 
-            
-            obj_mask["counts"] = [x_max, y_max, x_min, y_min]
-            obj_dict["object_masks"] = obj_mask
-            
-            feature_vector = [0 for j in range(43)]   #@ len of target attribute, total is 43
-            
-            obj_values = list(obj.values())   ### dict_keys type is not iterable
+                obj_dict["image_idxs"] = img_id
+                obj_dict["image_name"] = ann_data["metaData"]["id"]
+                obj_dict["iou_scores"] = iou
+                obj_type = "player"
+                obj_dict["object_types"] = "player"
+                
+                obj_mask = dict()
+                obj_mask["size"] = [img_w, img_h]
+                
+                yolo_x, yolo_y, yolo_w, yolo_h = detected_obj.split()[1:]
+                yolo_x, yolo_y, yolo_w, yolo_h = float(yolo_x), float(yolo_y), float(yolo_w), float(yolo_h)
+                x_max, x_min, y_max, y_min, _, _ = get_yolo_box_coords(yolo_x, yolo_y, yolo_w, yolo_h, img_w, img_h) 
+                
+                obj_mask["counts"] = [x_max, y_max, x_min, y_min]
+                obj_dict["object_masks"] = obj_mask
+                
+                feature_vector = [0 for j in range(89)]   #@ len of target attribute, total is 43
+                
+                # obj_values = list(obj.values())   ### dict_keys type is not iterable
 
-            for idx in [3, 6, 7, 8, 9, 10, 11, 12] :   #@ use total attributes about player
-                if obj_values[idx] == "기타" :   
-                    if idx == 7 :
-                        obj_values[idx] = "선수자세기타"
-                    if idx == 8 :
-                        obj_values[idx] = "선수동작기타"
-                feature_vector[att_bind[obj_values[idx]]] = 1    
+                obj_values = obj["value"]
+                
+                # for idx in [3, 6, 7, 8, 9, 10, 11, 12] :   #@ use total attributes about player
+                #     if obj_values[idx] == "기타" :   
+                #         if idx == 7 :
+                #             obj_values[idx] = "선수자세기타"
+                #         if idx == 8 :
+                #             obj_values[idx] = "선수동작기타"
+                #     feature_vector[att_bind[obj_values[idx]]] = 1    
 
-            obj_dict["feature_vectors"] = feature_vector
-            
+                for key in obj_values.keys() :
+                    if "성별" in key or "연령" in key :
+                        continue 
+                    if obj_values[key] == "기타" or obj_values[key] == "해당없음" :
+                        if "동작" in key :
+                            obj_values[key] = "동작"+obj_values[key]
+                        elif "행동" in key :
+                            obj_values[key] = "행동"+obj_values[key]
+                    elif obj_values[key] == "손으로잡다" :
+                        obj_values[key] = "손으로잡는다"
+                    elif obj_values[key] == "앉아있다." :
+                        obj_values[key] = "앉아있다"
+                    elif obj_values[key] == "배트를휘두다" :
+                        obj_values[key] = "배트를휘두르다"                        
+                        
+                    feature_vector[att_bind[obj_values[key]]] = 1    
+                
+
+                obj_dict["feature_vectors"] = feature_vector
+                
         # elif detected_obj.split()[0] == "1" :   #* ball
         #     obj = ann_data["labelinginfo_scene representation"]["경기도구"]
             
@@ -236,7 +256,7 @@ print("number of ball : ", object_types_list.count("ball"))
 print("number of player : ", object_types_list.count("player"))
 
 # with open("./yolo_anns/basketball_obj_yolo_iou_{}.json".format(str(int(iou_threshold*100))), 'w') as f :   #@ output annotation file path
-with open("./yolo_anns/basketball_obj_yolo_iou_{}.json".format("max"), 'w') as f :   
+with open("./yolo_anns/all-att-mini/basketball_obj_yolo_iou_{}.json".format("max"), 'w') as f :   
     json.dump(basketball_obj_json, f)
                     
 # with open("/data/ahngeo11/nia/attnet/annotations/basketball_yolo_iou_50_except_ls.txt", 'w') as f :
@@ -244,17 +264,19 @@ with open("./yolo_anns/basketball_obj_yolo_iou_{}.json".format("max"), 'w') as f
     
 
 def get_iou_thresholding_info(iou) :
-    with open("/data/ahngeo11/nia/attnet/annotations/train_ls.txt", 'r') as f :
+    with open("/data/ahngeo11/nia/attnet/annotations/all-train-mini-ls.txt", 'r') as f :
         train_list = f.readlines()
         for i in range(len(train_list)) :
             train_list[i] = train_list[i].split(".")[0]
-    with open("/data/ahngeo11/nia/attnet/annotations/val_ls.txt", 'r') as f :
+    with open("/data/ahngeo11/nia/attnet/annotations/all-val-mini-ls.txt", 'r') as f :
         val_list = f.readlines()
+        for i in range(len(val_list)) :
+            val_list[i] = val_list[i].split(".")[0]
     json_list = train_list+val_list
     for i in range(len(json_list)) :
         json_list[i] = json_list[i].strip('\n')
     
-    with open("/data/ahngeo11/nia/attnet/annotations/yolo_anns/basketball_obj_yolo_iou_{}.json".format(str(iou)), 'r') as f :
+    with open("/data/ahngeo11/nia/attnet/annotations/yolo_anns/all-att-mini/basketball_obj_yolo_iou_{}.json".format(str(iou)), 'r') as f :
             data = json.load(f)
     li_name, li_type = data["image_name"], data["object_types"]
     di = dict()
@@ -268,7 +290,7 @@ def get_iou_thresholding_info(iou) :
         len_li.append(len(dii))
     print(" 0, 1, 2, 3, 4 : \n", len_li.count(0), len_li.count(1), len_li.count(2), len_li.count(3), len_li.count(4))
         
-    with open("/data/ahngeo11/nia/attnet/annotations/yolo_anns/iou_{}_info.json".format(str(iou)), 'w') as f :
+    with open("/data/ahngeo11/nia/attnet/annotations/yolo_anns/all-att-mini/iou_{}_info.json".format(str(iou)), 'w') as f :
             json.dump(di, f)
             
 get_iou_thresholding_info("max")
